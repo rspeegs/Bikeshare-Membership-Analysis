@@ -22,8 +22,28 @@ df_2026_07 = pd.read_csv("202607-divvy-tripdata.csv") # July 2026
 
 #_____________________________________________
 
-#print(set(df["rideable_type"]))
-#print(set(df["member_casual"]))
+
+def update_missing_stations(dataframe):
+
+    dataframe = dataframe.fillna({"start_station_name": "None"})
+    dataframe = dataframe.fillna({"start_station_id"  : "None"})
+    dataframe = dataframe.fillna({"end_station_name"  : "None"})
+    dataframe = dataframe.fillna({"end_station_id"  : "None"})
+
+    return dataframe
+
+def find_bike_types(dataframe):
+    classic_bike_count = 0
+    electric_bike_count = 0
+    for bike_type in dataframe["rideable_type"]:
+        if bike_type == "electric_bike":
+            electric_bike_count += 1
+        elif bike_type == "classic_bike":
+            classic_bike_count += 1
+        else:
+            print("new bike_type found")
+
+    return [set(dataframe["rideable_type"]), electric_bike_count, classic_bike_count]
 
 def find_rider_counts(dataframe):
     total_rider_count = 0
@@ -99,8 +119,42 @@ def find_average_distance_biking(dataframe):
 
     return [round(average_distance_biking_casual, 5), round(average_distance_biking_member, 5)]
 
-
 #testing
-print(find_rider_counts(df_2025_10))
-print(find_average_distance_biking(df_2026_01))
-print(find_average_time_biking(df_2026_05))
+#print(find_rider_counts(df_2025_10))
+#print(find_average_distance_biking(df_2026_01))
+#print(find_average_time_biking(df_2026_05))
+#print(find_bike_types(dataframe=df_2025_07))
+#print(update_missing_stations(df_2026_07))
+
+def analyze_data(dataframe, print_casual_info = False, print_member_info = False):
+
+    dataframe = update_missing_stations(dataframe=dataframe)
+
+    total_rider_count = find_rider_counts(dataframe=dataframe)[0]
+    print(f"Total rider count : {total_rider_count}\n")
+
+    if print_casual_info:
+        casual_rider_count = find_rider_counts(dataframe=dataframe)[1]
+        casual_rider_count_percentage = find_rider_counts(dataframe=dataframe)[4]
+        casual_average_time_biking = find_average_time_biking(dataframe=dataframe)[0]
+        casual_average_distance_biking = find_average_distance_biking(dataframe=dataframe)[0]
+        print(f"Stats for casual riders:\n" 
+            f"count                   = {casual_rider_count}\n"
+            f"count_percentage        = {casual_rider_count_percentage}\n"
+            f"average_time_biking     = {casual_average_time_biking}\n"
+            f"average_distance_biking = {casual_average_distance_biking}\n")
+
+    if print_member_info:
+        member_rider_count = find_rider_counts(dataframe=dataframe)[2]
+        member_rider_count_percentage = find_rider_counts(dataframe=dataframe)[3]
+        member_average_time_biking = find_average_time_biking(dataframe=dataframe)[1]
+        member_average_distance_biking = find_average_distance_biking(dataframe=dataframe)[1]
+        print(f"Stats for member riders:\n" 
+            f"count                   = {member_rider_count}\n"
+            f"count_percentage        = {member_rider_count_percentage}\n"
+            f"average_time_biking     = {member_average_time_biking}\n"
+            f"average_distance_biking = {member_average_distance_biking}\n")
+
+    return
+
+analyze_data(df_2025_07, print_casual_info=True, print_member_info=True)
